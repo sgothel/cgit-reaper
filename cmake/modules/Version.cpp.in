@@ -1,0 +1,5 @@
+#include "Version.hpp"
+
+const jau::util::VersionNumberString cgitc_creaper::VERSION("@prj_VERSION_LONG@");
+const char* cgitc_creaper::VERSION_SHORT = "@prj_VERSION_SHORT@";
+const char* cgitc_creaper::VERSION_API = "@prj_VERSION_API@";

@@ -1,0 +1,37 @@
+/Debug*/
+/Release*/
+build*/
+dist*/
+issues/
+/.cache/
+/compile_commands.json
+
+# Object files
+*.o
+*.lib
+*.so
+*.so.*
+*.lo
+*.la
+*.pyc
+*.class
+
+# Temp files
+*.swp
+*.swo
+*~
+*.log
+documentation.tar.xz
+.clangd
+
+# Eclipse files
+#.cproject
+#.project
+
+# Archive files
+*.jar
+/Profiling test_cow_darray_perf01/
+/bin/
+old_jaulibs/
+perf/
+symbols/

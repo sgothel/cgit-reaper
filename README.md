@@ -17,7 +17,7 @@ to reduce collisions but limiting the maximum number of cache files to a conside
 - Set `cgitrc` value `cache-size=18446744073709551615`.
 - Pass `cgit-reaper` command-line argument `--files 1048575` for e.g. 1M files.
 
-Note that certain cgit features like 64-bit FNV-1a support is only available
+Note that certain cgit features like 64-bit FNV-1a support is currently only available
 in my [cgit branch](https://jausoft.com/cgit/cgit.git/).
 
 ## Usage
@@ -48,7 +48,7 @@ Adding 15 minutes crontab scheduling and limit maximum number of files to 1M,
 while allowing `cgit` to use full range of 64-bit FNV-1a value to reduce collisions.
 The latter can be achived by `cgitrc` config value `cache-size=18446744073709551615`.
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{/etc/crontab}
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # .---------------- minute (0 - 59)
 # |  .------------- hour (0 - 23)
 # |  |  .---------- day of month (1 - 31)

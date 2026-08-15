@@ -4,11 +4,12 @@ set(USE_LIBCURL OFF CACHE BOOL "" FORCE)
 set(BUILDJAVA OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(DONT_USE_RTTI ON CACHE BOOL "" FORCE)
+set(USE_LIBUNWIND OFF CACHE BOOL "" FORCE)
 
 include(jaulib/JaulibSetup.cmake)
 JaulibPreset()
 
-project (cgit-creaper LANGUAGES C CXX)
+project (cgit-reaper LANGUAGES C CXX)
 
 set (THREADS_PREFER_PTHREAD_FLAG ON)
 find_package (Threads REQUIRED)

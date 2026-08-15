@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
 {
     const cgit::config & cfg = cgit::config::get();
 
-    std::string exe_name = "cgit-creaper";
+    std::string exe_name = "cgit-reaper";
     if (argc>0) {
         exe_name = jau::io::fs::basename(argv[0]);
     }
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
         }
     }
     if (verbose) {
-        jau_fprintf_ts(stdout, "%s: version %s\n", exe_name, cgitc_creaper::VERSION);
+        jau_fprintf_ts(stdout, "%s: version %s\n", exe_name, cgitc_reaper::VERSION);
         std::cout << cfg << "\n";
     }
 

@@ -14,7 +14,7 @@
 
 #include <jau/util/VersionNumber.hpp>
 
-namespace cgitc_creaper {
+namespace cgitc_reaper {
     /** \addtogroup Gamp
      *
      *  @{

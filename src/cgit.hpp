@@ -53,6 +53,8 @@ namespace cgit {
     	/* minimum transfer rate in Bps for sending/receiving a full cached body to/from the client. Defaults to 500 Bps. */
     	int client_io_min_rate;
         int local_time;
+        // extension: defaults to `/var/run`, for e.g. `/var/run/<exe>/<exe>.pid` lock file (singleton service)
+        std::string pid_parent_dir;
     };
 
     int get_cache_max_ttl(const config &);

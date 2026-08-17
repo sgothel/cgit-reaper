@@ -9,6 +9,8 @@
  * you can obtain one at https://opensource.org/license/mit/.
  */
 
+#include <unistd.h>
+#include <cerrno>
 #include <cstdio>
 #include <cmath>
 #include <cinttypes>
@@ -16,11 +18,11 @@
 #include <jau/io/file_util.hpp>
 #include <jau/debug.hpp>
 #include <jau/enum_util.hpp>
+#include "jau/basic_types.hpp"
+#include "jau/fraction_type.hpp"
 
 #include <cgit.hpp>
 #include "Version.hpp"
-#include "jau/basic_types.hpp"
-#include "jau/fraction_type.hpp"
 
 using namespace jau::enums;
 using namespace jau::int_literals;
@@ -56,6 +58,23 @@ int main(int argc, char *argv[])
     if (verbose) {
         jau_fprintf_ts(stdout, "%s: version %s\n", exe_name, cgitc_reaper::VERSION);
         std::cout << cfg << "\n";
+    }
+    jau::io::fs::ScopedFD fdh;
+    {
+        std::string pid_file;
+        pid_file.reserve(250);
+        pid_file.append(cfg.pid_parent_dir).append("/").append(exe_name).append("/").append(exe_name).append(".pid");
+        ::pid_t pid = ::getpid();
+        fdh = jau::io::fs::create_pid_lock_file(pid_file, pid);
+        if (*fdh < 0) {
+            if (*fdh == -EAGAIN || *fdh == -EACCES) {
+                jau_fprintf_ts(stdout, "%s: PID lock-file is already locked: `%s`\n", exe_name, pid_file);
+            }
+            return 0;
+        }
+        if (verbose) {
+            jau_fprintf_ts(stdout, "%s: pid %d, pid-file %s\n", exe_name, pid, pid_file);
+        }
     }
 
     size_t total_size = 0;

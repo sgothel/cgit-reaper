@@ -53,6 +53,8 @@ static void config_cb(cgit::config &cfg, const std::string &name, const std::str
 		cfg.cache_snapshot_ttl = std::atoi(value.c_str());
 	else if (name == "local-time")
 		cfg.local_time = std::atoi(value.c_str());
+    else if (name == "pid-parent-dir")
+        cfg.pid_parent_dir = value;
 }
 
 struct linebuffer_t {
@@ -148,6 +150,7 @@ cgit::config::config(const char *default_filename) noexcept {
         client_io_idle_timeout = 20000;
         client_io_min_rate = 500;
         local_time = 0;
+        pid_parent_dir = "/var/run";
     }
     parse_configfile(*this, cgit_config);
 }
@@ -171,6 +174,7 @@ std::ostream& cgit::operator<<(std::ostream& os, const cgit::config& cfg)
        << "cache-lock-retry=" << cfg.cache_lock_retry << "\n"
        << "cache-lock-timeout=" << cfg.cache_lock_timeout << "\n"
        << "client-io-idle-timeout=" << cfg.client_io_idle_timeout << "\n"
-       << "client-io-min-rate=" << cfg.client_io_min_rate << "\n";
+       << "client-io-min-rate=" << cfg.client_io_min_rate << "\n"
+       << "pid-parent-dir=" << cfg.pid_parent_dir << "\n";
     return os;
 }

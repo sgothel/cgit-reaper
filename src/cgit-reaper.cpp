@@ -37,15 +37,15 @@ int main(int argc, char *argv[])
     }
     bool verbose = false;
     bool dry_run = false;
-    size_t max_files = cfg.cache_size;
-    int ttl_min = cgit::get_cache_max_ttl(cfg);
+    size_t max_files = cfg.cache_max_files;
+    int ttl_minutes = cgit::get_cache_ttl(cfg);
     for (int i = 1; i < argc; ++i) {
         if (!strcmp("-v", argv[i]) || !strcmp("--verbose", argv[i])) {
             verbose=true;
         } else if (!strcmp("-n", argv[i]) || !strcmp("--dry-run", argv[i])) {
             dry_run=true;
         } else if(!strcmp("--ttl", argv[i]) && i+1<argc) {
-            ttl_min = std::atoi(argv[i+1]);
+            ttl_minutes = std::atoi(argv[i+1]);
             ++i;
         } else if(!strcmp("--files", argv[i]) && i+1<argc) {
             max_files = (size_t)std::strtoul(argv[i+1], nullptr, 10);
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
         std::string pid_file;
         pid_file.reserve(250);
         pid_file.append(cfg.pid_parent_dir).append("/").append(exe_name).append("/").append(exe_name).append(".pid");
-        ::pid_t pid = ::getpid();
+        const ::pid_t pid = ::getpid();
         fdh = jau::io::fs::create_pid_lock_file(pid_file, pid);
         if (*fdh < 0) {
             if (*fdh == -EAGAIN || *fdh == -EACCES) {
@@ -84,10 +84,11 @@ int main(int argc, char *argv[])
     size_t remaining_files = 0;
     size_t remaining_size = 0;
     const jau::fraction_timespec now = jau::getWallClockTime();
-    const jau::fraction_timespec ttl((int64_t)ttl_min * 60_i64, 0);
+    const jau::fraction_timespec ttl((int64_t)ttl_minutes * 60_i64, 0);
 
-    jau_fprintf_ts(stdout, "%s: ttl %.0f min, max-files %'zu (cfg %'zu) @ %s, dry-run %s\n",
-        exe_name, ttl.to_double()/60.0, max_files, cfg.cache_size, cfg.cache_root, dry_run);
+    jau_fprintf_ts(stdout, "%s: ttl %.0f min, max-files %'zu, cache-size %d hash-bits @ %s, dry-run %s\n",
+        exe_name, ttl.to_double()/60.0, max_files, std::bit_width(cfg.cache_size), cfg.cache_root, dry_run);
+    ::fflush(nullptr);
 
     if (!max_files) {
         return 0; // nothing to do
@@ -135,6 +136,7 @@ int main(int argc, char *argv[])
             file_count, (double)total_size/1000000.0,
             removed_files, (double)removed_size/1000000.0,
             remaining_files, (double)remaining_size/1000000.0);
+        ::fflush(nullptr);
     }
     if (remaining_files > max_files) {
         // Pass-2: Delete the oldest files exceeding cache-size
@@ -190,6 +192,7 @@ int main(int argc, char *argv[])
             file_count, (double)total_size/1000000.0,
             removed_files, (double)removed_size/1000000.0,
             remaining_files, (double)remaining_size/1000000.0);
+        ::fflush(nullptr);
     }
 	return 0;
 }

@@ -53,11 +53,17 @@ namespace cgit {
     	/* minimum transfer rate in Bps for sending/receiving a full cached body to/from the client. Defaults to 500 Bps. */
     	int client_io_min_rate;
         int local_time;
-        // extension: defaults to `/var/run`, for e.g. `/var/run/<exe>/<exe>.pid` lock file (singleton service)
+        // extension: PID lock directory parent, defaults to `/var/run`, e.g. for `/var/run/cgit-reaper/cgit-reaper.pid` lock file
         std::string pid_parent_dir;
+        // extension: Maximum number of cached files, defaults to 1048576 // ~1M files
+        size_t cache_max_files;
+        // extension: Minimum TTL of cached files in minutes, defaults to 1.
+        int cache_min_ttl;
+        // extension: Maximum TTL of cached files in minutes, defaults to 525600 (~1 year).
+        int cache_max_ttl;
     };
 
-    int get_cache_max_ttl(const config &);
+    int get_cache_ttl(const config &) noexcept;
     std::ostream& operator<<(std::ostream& os, const config& p);
 }
 

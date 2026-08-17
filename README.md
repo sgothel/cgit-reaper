@@ -10,12 +10,15 @@ A canonical repository copy is hosted on [Gothel Software](https://jausoft.com/c
 ## Goals
 Cleanup [cgit](https://git.zx2c4.com/cgit/about/) cache.
 - Phase 1 via expiration date, either by commandline option `--ttl <minutes>` or `cgitrc` maximum `cache-*-ttl`.
-- Phase 2 oldest files exceeding max-files count, either by commandline option `--files <number>` or `cgitrc` `cache-size`.
+- Phase 2 oldest files exceeding maximum allowed number of files,
+  see commandline option `--files <number>` or new `cgitrc` config `cache-max-files`.
 
 Main objective for this file reaper is to allow `cgit` to use the full range of 64-bit FNV-1a value
 to reduce collisions but limiting the maximum number of cache files to a considerably lower number.
-- Set `cgitrc` value `cache-size=18446744073709551615`.
-- Pass `cgit-reaper` command-line argument `--files 1048575` for e.g. 1M files.
+
+Set the following cgitrc values
+- `cache-size=18446744073709551615` (full 64-bit hash).
+- `cache-max-files=1048576` (1M files, default).
 
 Note that certain cgit features like 64-bit FNV-1a support is currently only available
 in my [cgit branch](https://jausoft.com/cgit/cgit.git/).
@@ -28,16 +31,71 @@ in my [cgit branch](https://jausoft.com/cgit/cgit.git/).
 `-v` or `--verbose`: Enables verbose mode.
 `-n` or `--dry-run`: Perform a trial run with no changes made.
 `--ttl <minutes>`  : Override ttl value for expiration.
-`--files <number>` : Override maximum number of cached files.
+`--files <number>` : Maximum number of cached files, overrides `cache-max-files` config.
 `-h` or `--help`   : Print brief command-line arguments and exit.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+### Relevant `cgitrc` config
+
+Reusing vanilla `cgitrc` configuration values
+- `cache-size` in conjunction w/ `cgit-reaper` the 64-bit FNV-1a hash-mask,
+  which should be set to the maximum value of 18446744073709551615.
+  `cgit-reaper` removes expired and exceeding `cache-max-files` files.
+- `cache-root` root directory of the `cgit` cache, defaults to `/var/cache/cgit`.
+- The TTL values in minutes are computed as follows,
+  if not overriden by commandline option `--ttl <minutes>`
+  - Minimum value of
+    - `cache-max-ttl`
+    - Maximum value of
+      - `cache-root-ttl`
+      - `cache-static-ttl`
+      - `cache-dynamic-ttl`
+      - `cache-scanrc-ttl`
+      - `cache-about-ttl`
+      - `cache-snapshot-ttl`
+      - `cache-repo-ttl`
+      - `cache-min-ttl`
+
+Additional `cgitrc` configuration values
+- `pid-parent-dir` PID lock directory parent for `cgit-reaper`, defaults to `/var/run`.
+- `cache-max-files` Maximum number of cached files, defaults to 1048576 (1M files).
+- `cache-min-ttl` Minimum TTL of cached files in minutes, defaults to 1.
+- `cache-max-ttl` Maximum TTL of cached files in minutes, defaults to 525600 (~1 year).
+
+#### Relevant `cgitrc` example
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# new cgit-reaper config (defaults)
+pid-parent-dir=/var/run
+cache-max-files=1048576
+cache-min-ttl=1
+cache-max-ttl=525600
+
+# shared cgit/cgit-reaper config (best)
+cache-size=18446744073709551615
+
+# shared cgit/cgit-reaper config (defaults)
+cache-root=/var/cache/cgit
+cache-root-ttl=5
+cache-static-ttl=-1
+cache-dynamic-ttl=5
+cache-scanrc-ttl=15
+cache-about-ttl=15
+cache-snapshot-ttl=5
+cache-repo-ttl=5
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ### Installation
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.sh}
+# PID file for locking
+mkdir -pv /var/run/cgit-reaper
+chown -v webrunner:webrunner /var/run/cgit-reaper
+
+# The log file
 touch /var/log/cgit-reaper.log
 chown webrunner:webrunner /var/log/cgit-reaper.log
 
+# The executable file
 cp cgit-reaper /srv/www/cgit/cgit-reaper
 chown webrunner:webrunner /srv/www/cgit/cgit-reaper
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -56,7 +114,7 @@ The latter can be achived by `cgitrc` config value `cache-size=18446744073709551
 # |  |  |  |  .---- day of week (0 - 6) (Sunday=0 or 7) OR sun,mon,tue,wed,thu,fri,sat
 # |  |  |  |  |
 # *  *  *  *  *  user-name command to be executed
-*/15 *  *  *  *  webrunner /srv/www/cgit/cgit-reaper --files 1048575 2>&1 >> /var/log/cgit-reaper.log
+*/15 *  *  *  *  webrunner /srv/www/cgit/cgit-reaper 2>&1 >> /var/log/cgit-reaper.log
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ## Supported Platforms
